@@ -12,8 +12,12 @@ services:
   # Django backend
   backend:
     build: ./backend
-    # Force the use of the ASGI server on port 8000
-    command: daphne -b 0.0.0.0 -p 8000 core.asgi:application
+    # Do migrations, data fetching and asgi configuration before starting the server
+    command: >
+      sh -c "python manage.py makemigrations && 
+             python manage.py migrate && 
+             python manage.py fetch_pokemon && 
+             daphne -b 0.0.0.0 -p 8000 core.asgi:application"
     volumes:
       - ./backend:/app
     ports:

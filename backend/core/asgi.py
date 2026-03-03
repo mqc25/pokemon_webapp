@@ -1,17 +1,16 @@
 import os
-import django
 from django.core.asgi import get_asgi_application
-
-# Set environment before importing anything else
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
-django.setup()
-
 from channels.routing import ProtocolTypeRouter, URLRouter
-from pokemon.routing import websocket_urlpatterns
+from channels.auth import AuthMiddlewareStack
+import pokemon.routing 
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": URLRouter(
-        websocket_urlpatterns
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            pokemon.routing.websocket_urlpatterns
+        )
     ),
 })

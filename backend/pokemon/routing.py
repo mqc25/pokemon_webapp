@@ -1,7 +1,6 @@
-# backend/pokemon/routing.py
 from django.urls import re_path
 from . import consumers
 
 websocket_urlpatterns = [
-    re_path(r'ws/weather/$', consumers.WeatherConsumer.as_asgi()),
+    re_path(r'ws/pokemon/(?P<pokemon_id>\d+)/$', consumers.WeatherConsumer.as_asgi()),
 ]

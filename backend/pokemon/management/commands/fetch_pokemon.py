@@ -9,6 +9,10 @@ class Command(BaseCommand):
     help = 'Fetches 100 Pokemon and assigns coordinates from Polyline files'
 
     def handle(self, *args, **options):
+        if Pokemon.objects.exists():
+            self.stdout.write(self.style.SUCCESS('Database already has Pokemon. Skipping fetch.'))
+            return
+
         # parse the Polyline files
         def get_points_from_file(filename):
             with open(filename, 'r') as f:
@@ -51,7 +55,8 @@ class Command(BaseCommand):
                 longitude=lng,
                 coordinates=Point(lng, lat),
                 recent_moves=str([m['move']['name'] for m in detail_res['moves'][:4]]),
-                is_custom=False
+                is_custom=False,
+                owner=None
             )
 
-        self.stdout.write(self.style.SUCCESS(f'Successfully imported 100 Pokemon using Polylines!'))
+        self.stdout.write(self.style.SUCCESS(f'Successfully imported 100 wild Pokemon using Polylines!'))

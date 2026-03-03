@@ -2,13 +2,18 @@ import { useEffect, useState } from 'react';
 import { Typography, Box, LinearProgress, Chip } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 
-const PokemonEnergy = () => {
+const PokemonEnergy = ({ pokemonId }) => {
   const [energy, setEnergy] = useState(100);
   const [weather, setWeather] = useState('Loading...');
-
+  
   useEffect(() => {
+    // Check for connection type
+    const socketUrl = window.location.protocol === 'https:' 
+    ? `wss://${window.location.host}/ws/pokemon/${pokemonId}/` 
+    : `ws://${window.location.host}/ws/pokemon/${pokemonId}/`;
+
     // Hook AsyncWebsocketConsumer for weather
-    const socket = new WebSocket('ws://localhost/ws/weather/');
+    const socket = new WebSocket(socketUrl);
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);

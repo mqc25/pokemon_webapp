@@ -7,13 +7,14 @@ from django.db import transaction
 class PokemonSerializer(serializers.ModelSerializer):
     # favorite tag
     is_favorite = serializers.SerializerMethodField()
+    owner_name = serializers.CharField(source='owner.username', read_only=True, default="Wild")
 
     class Meta:
         model = Pokemon
         fields = [
             'id', 'name', 'latitude', 'longitude', 'types', 
             'sprite_url', 'encounter_location', 'recent_moves', 
-            'is_custom', 'is_favorite'
+            'is_custom', 'is_favorite', 'owner_name'
         ]
 
     def get_is_favorite(self, obj):

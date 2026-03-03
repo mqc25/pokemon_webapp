@@ -22,6 +22,12 @@ export const MapView = ({ filteredPokemon, UCLA_COORDS, calculateDistance }) => 
             key={p.id} 
             position={[p.latitude, p.longitude]} 
             icon={createCustomIcon(p.sprite_url, p.types, p.id)}
+            eventHandlers={{
+              click: (e) => {
+                // Fix bubbleup issue when clicking on marker
+                L.DomEvent.stopPropagation(e); 
+              },
+            }}
           >
             <Popup>
               <PokemonPopup pokemon={p} calculateDistance={calculateDistance} />

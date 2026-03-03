@@ -24,6 +24,15 @@ class Pokemon(models.Model):
         source = "Custom/CSV" if self.is_custom else "PokeAPI"
         return f"{self.name} ({source})"
 
+    # Ownership
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='owned_pokemon'
+    )
+
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
