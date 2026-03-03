@@ -15,4 +15,5 @@ POSTGRES_HOST=<>
 
 POSTGRES_PORT=<>
 
-## localhost.pem and localhost-key.pem
+## certs folder
+localhost.pem and localhost-key.pem for https CA certification
