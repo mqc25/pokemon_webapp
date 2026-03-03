@@ -27,19 +27,85 @@ class Command(BaseCommand):
         points_aj = get_points_from_file('A - J')
         points_kz = get_points_from_file('K -Z')
 
-        self.stdout.write("Fetching Pokemon from PokeAPI...")
-        response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=100")
-        results = response.json()['results']
+        self.stdout.write("Fetching Pokemon data via GraphQL (1 Request)...")
 
-        # Clear intial leftover pokemon
+        # GraphQL query to fetch Pokemon data with types, moves, encounters, and sprites
+        graphql_query = """
+        query GetPokemonData {
+          pokemon_v2_pokemon(limit: 100, order_by: {id: asc}) {
+            name
+            pokemon_v2_pokemontypes {
+              pokemon_v2_type {
+                name
+              }
+            }
+            pokemon_v2_pokemonmoves(limit: 4) {
+              pokemon_v2_move {
+                name
+              }
+            }
+            pokemon_v2_encounters {
+              pokemon_v2_locationarea {
+                name
+              }
+            }
+            pokemon_v2_pokemonsprites {
+              sprites
+            }
+          }
+        }
+        """
+
+        try:
+            response = requests.post(
+                'https://beta.pokeapi.co/graphql/v1beta',
+                json={'query': graphql_query},
+                timeout=15
+            )
+            response.raise_for_status()
+            
+            results = response.json()['data']['pokemon_v2_pokemon']
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Failed to fetch data: {e}"))
+            return
+
+        # Clear initial leftover pokemon
         Pokemon.objects.filter(is_custom=False).delete()
 
-        for entry in results:
-            detail_res = requests.get(entry['url']).json()
-            name = detail_res['name'].capitalize()
+        # Parse the GraphQL JSON response
+        for p in results:
+            name = p['name'].capitalize()
             first_letter = name[0].upper()
 
-            # Choose coordinates based on first letter of Pokemon name
+            # Format Types
+            types = ", ".join([t['pokemon_v2_type']['name'].capitalize() for t in p['pokemon_v2_pokemontypes']])
+
+            # Format Moves
+            moves = str([m['pokemon_v2_move']['name'] for m in p['pokemon_v2_pokemonmoves']])
+
+            # Format Encounters
+            encounters = p['pokemon_v2_encounters']
+            if encounters:
+                all_locations = [loc['pokemon_v2_locationarea']['name'].replace('-', ' ').title() for loc in encounters]
+                locations_string = ", ".join(all_locations)
+                
+                if len(locations_string) > 255:
+                    encounter_location = locations_string[:252] + "..."
+                else:
+                    encounter_location = locations_string
+            else:
+                encounter_location = "Unknown Location"
+
+            # Format Sprite
+            try:
+                sprites_data = p['pokemon_v2_pokemonsprites'][0]['sprites']
+                if isinstance(sprites_data, str):
+                    sprites_data = json.loads(sprites_data)
+                sprite_url = sprites_data.get('front_default', '')
+            except (IndexError, json.JSONDecodeError):
+                sprite_url = ''
+
+            # Choose coordinates
             if 'A' <= first_letter <= 'J':
                 chosen_coord = random.choice(points_aj)
             else:
@@ -47,16 +113,18 @@ class Command(BaseCommand):
 
             lng, lat = chosen_coord
 
+            # Save to Database
             Pokemon.objects.create(
                 name=name,
-                sprite_url=detail_res['sprites']['front_default'],
-                types=", ".join([t['type']['name'].capitalize() for t in detail_res['types']]),
+                sprite_url=sprite_url,
+                types=types,
                 latitude=lat,
                 longitude=lng,
                 coordinates=Point(lng, lat),
-                recent_moves=str([m['move']['name'] for m in detail_res['moves'][:4]]),
+                recent_moves=moves,
+                encounter_location=encounter_location,
                 is_custom=False,
                 owner=None
             )
 
-        self.stdout.write(self.style.SUCCESS(f'Successfully imported 100 wild Pokemon using Polylines!'))
+        self.stdout.write(self.style.SUCCESS('Successfully imported wild Pokemon'))

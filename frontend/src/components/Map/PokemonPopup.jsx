@@ -1,43 +1,59 @@
 import { Box, Typography, Button } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
 import PokemonEnergy from './PokemonEnergy';
+import { TypeBadge } from '../Common/TypeBadge';
+import { MoveList } from '../Common/MoveList';
 
-export const PokemonPopup = ({ pokemon, calculateDistance }) => (
-  <Box sx={{ textAlign: 'center', minWidth: 200 }}>
-    <img src={pokemon.sprite_url} alt={pokemon.name} width="80" />
-    <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>{pokemon.name}</Typography>
-    <Typography variant="body2"><strong>Type:</strong> {pokemon.types}</Typography>
-    
-    {/*Display location*/}
-    <Typography variant="body2">
-      <strong>Coords:</strong> {pokemon.latitude.toFixed(4)}, {pokemon.longitude.toFixed(4)}
-    </Typography>
+export const PokemonPopup = ({ pokemon, calculateDistance }) => {
+  const displayLocation = pokemon.encounter_location 
+    ? pokemon.encounter_location.split(',')[0].trim() 
+    : 'Unknown Location';
 
-    {/* Display Ownership*/}
-    <Typography 
-      variant="subtitle2" 
-      sx={{ 
-        color: pokemon.owner_name === 'Wild' ? 'green' : 'primary.main',
-        fontWeight: 'bold',
-        mb: 1 
-      }}
-    >
-      Owner: {pokemon.owner_name}
-    </Typography>
-    
-    <PokemonEnergy pokemonId={pokemon.id} />
+  return (
+    <Box sx={{ textAlign: 'center', minWidth: 200 }}>
+      <img src={pokemon.sprite_url} alt={pokemon.name} width="80" />
+      <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>{pokemon.name}</Typography>
 
-    <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-      Recent Moves: {pokemon.recent_moves || 'N/A'}
-    </Typography>
+      {/*Display type badge*/}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+          <TypeBadge types={pokemon.types} />
+      </Box>    
 
-    {/*"How far am I from home?" button*/}
-    <Button 
-      variant="contained" size="small" fullWidth startIcon={<SchoolIcon />} 
-      onClick={() => calculateDistance(pokemon.latitude, pokemon.longitude, pokemon.name)} 
-      sx={{ mt: 1, textTransform: 'none' }}
-    >
-      How far am I from home?
-    </Button>
-  </Box>
-);
+      {/*Display location*/}
+      <Typography variant="body2">
+        <strong>Coords:</strong> {pokemon.latitude.toFixed(4)}, {pokemon.longitude.toFixed(4)}
+      </Typography>
+
+      <Typography variant="body2">
+        <strong>Seen:</strong> {displayLocation}
+      </Typography>
+
+      {/* Display ownership*/}
+      <Typography 
+        variant="subtitle2" 
+        sx={{ 
+          color: pokemon.owner_name === 'Wild' ? 'green' : 'primary.main',
+          fontWeight: 'bold',
+          mb: 1 
+        }}
+      >
+        Owner: {pokemon.owner_name}
+      </Typography>
+      
+      {/* Display energy*/}
+      <PokemonEnergy pokemonId={pokemon.id} />
+
+      {/* Display recent moves*/}
+      <MoveList moves={pokemon.recent_moves} /> 
+
+      {/*"How far am I from home?" button*/}
+      <Button 
+        variant="contained" size="small" fullWidth startIcon={<SchoolIcon />} 
+        onClick={() => calculateDistance(pokemon.latitude, pokemon.longitude, pokemon.name)} 
+        sx={{ mt: 1, textTransform: 'none' }}
+      >
+        How far am I from home?
+      </Button>
+    </Box>
+  );
+};

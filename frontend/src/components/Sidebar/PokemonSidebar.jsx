@@ -8,6 +8,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SearchIcon from '@mui/icons-material/Search';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { TypeBadge } from '../Common/TypeBadge';
 
 export const PokemonSidebar = ({ 
   username, handleLogout, handleFileUpload, 
@@ -57,7 +58,11 @@ export const PokemonSidebar = ({
               <ListItemAvatar>
                 <Avatar src={p.sprite_url} variant="rounded" sx={{ border: `2px solid ${getStableMarkerColor(p.types, p.id)}` }} />
               </ListItemAvatar>
-              <ListItemText primary={<Typography fontWeight="600">{p.name}</Typography>} secondary={p.types} />
+              <ListItemText 
+                primary={<Typography fontWeight="600">{p.name}</Typography>} 
+                secondary={<TypeBadge types={p.types} />} 
+                secondaryTypographyProps={{ component: 'div' }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
