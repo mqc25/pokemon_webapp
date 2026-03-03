@@ -45,10 +45,14 @@ class PokemonViewSet(viewsets.ModelViewSet):
             next(reader) 
             for row in reader:
                 Pokemon.objects.create(
-                    name=row[0], latitude=float(row[1]), longitude=float(row[2]),
-                    location=Point(float(row[2]), float(row[1])),
-                    types=row[3], encounter_location=row[4],
-                    recent_moves=row[5], sprite_url=row[6], is_custom=True,
+                    name=row[0],
+                    latitude=float(row[1]), 
+                    longitude=float(row[2]),
+                    coordinates=Point(float(row[2]), float(row[1])),
+                    types=row[3], 
+                    encounter_location=row[4],
+                    recent_moves=row[5], 
+                    sprite_url=row[6], is_custom=True,
                     owner=request.user
                 )
             return Response({"status": "Uploaded"}, status=201)

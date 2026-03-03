@@ -5,14 +5,24 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class WeatherConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        refresh_time = 10
+        # check if user is still connected in the background task
+        self.is_connected = True
         await self.accept()
+        self.weather_task = asyncio.create_task(self.send_weather_updates())
+
+    async def disconnect(self, close_code):
+        # when user leaves, cancel background task
+        self.is_connected = False
+        if hasattr(self, 'weather_task'):
+            self.weather_task.cancel()
+
+    async def send_weather_updates(self):
+        refresh_time = 10
         try:
-            while True:
+            while self.is_connected:
                 conditions = ['Sunny', 'Rainy', 'Cloudy', 'Thunderstorm']
                 current_weather = random.choice(conditions)
                 
-                # Sunny (80-100), Rainy (60-80), Cloudy (40-60), Thunderstorm (20-40)
                 match current_weather:
                     case 'Sunny':
                         energy = random.randint(80, 100)
@@ -27,6 +37,10 @@ class WeatherConsumer(AsyncWebsocketConsumer):
                     'energy_level': energy,
                     'condition': current_weather
                 }))
+                
                 await asyncio.sleep(refresh_time)
+                
+        except asyncio.CancelledError:
+            pass
         except Exception as e:
             print(f"WebSocket Error: {e}")
