@@ -1,0 +1,15 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    allowedHosts: ['untranscended-karlee-orthopneic.ngrok-free.dev'],
+    watch: {
+      usePolling: true,
+    },
+    host: true,
+    port: 5173,
+    strictPort: true,
+  },
+})

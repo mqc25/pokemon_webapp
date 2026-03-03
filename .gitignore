@@ -1,0 +1,45 @@
+# --- Security & Credentials ---
+.env
+.env.*
+certs/
+*.pem
+*.key
+
+# --- Django ---
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+__pycache__/
+*.py[cod]
+*$py.class
+local_settings.py
+
+# --- React / Frontend ---
+node_modules/
+dist/
+build/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Docker ---
+.dockerignore
+
+# --- Python Environment ---
+venv/
+.venv/
+env/
+.env/
+bin/
+lib/
+include/
+
+# --- Operating System & IDEs ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

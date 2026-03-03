@@ -1,0 +1,16 @@
+# Core Framework
+Django>=4.2,<5.0
+djangorestframework>=3.14  # To build the API [cite: 3]
+django-cors-headers>=4.3   # Allows your React frontend to talk to your Django backend
+
+# Database & Geographic Mapping
+psycopg2-binary>=2.9       # PostgreSQL database adapter
+Django>=4.2,<5.0           # (Make sure GeoDjango is enabled in settings later)
+
+# External API & Data Processing
+requests>=2.31             # To fetch the 100 Pokemon from PokeAPI [cite: 46]
+pandas>=2.0                # For parsing the uploaded CSV files cleanly 
+
+# Real-time WebSockets
+channels>=4.0              # For the live energy level updates [cite: 38]
+daphne>=4.0                # The ASGI server required to run Django Channels
