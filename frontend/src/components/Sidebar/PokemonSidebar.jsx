@@ -1,4 +1,8 @@
-import { Drawer, Box, Typography, IconButton, Button, TextField, InputAdornment, Divider, List, ListItem, ListItemAvatar, Avatar, ListItemText, Pagination } from '@mui/material';
+import { 
+  Drawer, Box, Typography, IconButton, Button, TextField, 
+  InputAdornment, Divider, List, ListItem, ListItemAvatar, 
+  Avatar, ListItemText, Pagination, ListItemButton 
+} from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SearchIcon from '@mui/icons-material/Search';
@@ -9,7 +13,8 @@ export const PokemonSidebar = ({
   username, handleLogout, handleFileUpload, 
   searchQuery, setSearchQuery, setPage, 
   paginatedList, toggleFavorite, page, totalPages,
-  getStableMarkerColor 
+  getStableMarkerColor,
+  onSelectPokemon
 }) => (
   <Drawer
     variant="permanent"
@@ -38,15 +43,22 @@ export const PokemonSidebar = ({
     <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
       <List>
         {paginatedList.map(p => (
-          <ListItem key={p.id} divider secondaryAction={
-            <IconButton onClick={() => toggleFavorite(p.id)}>
-              {p.is_favorite ? <FavoriteIcon sx={{ color: '#ff1744' }} /> : <FavoriteBorderIcon />}
-            </IconButton>
-          }>
-            <ListItemAvatar>
-              <Avatar src={p.sprite_url} variant="rounded" sx={{ border: `2px solid ${getStableMarkerColor(p.types, p.id)}` }} />
-            </ListItemAvatar>
-            <ListItemText primary={<Typography fontWeight="600">{p.name}</Typography>} secondary={p.types} />
+          <ListItem 
+            key={p.id} 
+            disablePadding
+            secondaryAction={
+              <IconButton onClick={() => toggleFavorite(p.id)}>
+                {p.is_favorite ? <FavoriteIcon sx={{ color: '#ff1744' }} /> : <FavoriteBorderIcon />}
+              </IconButton>
+            }
+          >
+            {/*ListItemButton to select the Pokemon and center to the map */}
+            <ListItemButton onClick={() => onSelectPokemon(p)}>
+              <ListItemAvatar>
+                <Avatar src={p.sprite_url} variant="rounded" sx={{ border: `2px solid ${getStableMarkerColor(p.types, p.id)}` }} />
+              </ListItemAvatar>
+              <ListItemText primary={<Typography fontWeight="600">{p.name}</Typography>} secondary={p.types} />
+            </ListItemButton>
           </ListItem>
         ))}
       </List>

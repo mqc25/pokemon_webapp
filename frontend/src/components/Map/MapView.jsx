@@ -1,13 +1,33 @@
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMap } from 'react-leaflet';
 import { Box } from '@mui/material';
+import L from 'leaflet';
 import { createCustomIcon } from '../../utils/markerUtils';
 import { PokemonPopup } from './PokemonPopup';
 
-export const MapView = ({ filteredPokemon, UCLA_COORDS, calculateDistance }) => {
+// Component to handle map centering when a Pokemon is selected
+const MapFocusHandler = ({ selectedPokemon }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (selectedPokemon) {
+      // Centers the map on the coordinates with a smooth animation
+      map.flyTo([selectedPokemon.latitude, selectedPokemon.longitude], 15, {
+        animate: true,
+        duration: 1.5
+      });
+    }
+  }, [selectedPokemon, map]);
+
+  return null;
+};
+
+export const MapView = ({ filteredPokemon, UCLA_COORDS, calculateDistance, selectedPokemon }) => {
   return (
     <Box sx={{ flexGrow: 1, height: '100%' }}>
       <MapContainer center={UCLA_COORDS} zoom={13} style={{ height: "100%", width: "100%" }}>
+        <MapFocusHandler selectedPokemon={selectedPokemon} />
         <LayersControl position="topright">
           <LayersControl.BaseLayer checked name="OpenStreetMap">
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

@@ -35,6 +35,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
 
   // Initial 100 pokemon fetch
   useEffect(() => { 
@@ -119,6 +120,11 @@ function App() {
     );
   }
 
+  // Function to handle sidebar clicks
+  const handleSelectPokemon = (pokemon) => {
+    setSelectedPokemon(pokemon);
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
       <PokemonSidebar 
@@ -133,12 +139,14 @@ function App() {
         page={page}
         totalPages={Math.ceil(filteredPokemon.length / itemsPerPage)}
         getStableMarkerColor={getStableMarkerColor}
+        onSelectPokemon={handleSelectPokemon}
       />
       
       <MapView 
         filteredPokemon={filteredPokemon}
         UCLA_COORDS={UCLA_COORDS}
         calculateDistance={calculateDistance}
+        selectedPokemon={selectedPokemon}
       />
     </Box>
   );
