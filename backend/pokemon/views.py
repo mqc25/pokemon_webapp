@@ -15,15 +15,13 @@ class PokemonViewSet(viewsets.ModelViewSet):
     queryset = Pokemon.objects.all().order_by('name')
     serializer_class = PokemonSerializer
     parser_classes = [MultiPartParser, FormParser]
-    # FIX: Prevents AnonymousUser from ever hitting your favorite logic
+    #  authentication check
     permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=True, methods=['post'], url_path='toggle_favorite')
     def toggle_favorite(self, request, pk=None):
-        # Line 34: Logic must be indented 4 spaces inside the function
         pokemon = self.get_object()
         
-        # request.user is now guaranteed to be a real User ID
         fav, created = Favorite.objects.get_or_create(
             user=request.user, 
             pokemon=pokemon
@@ -69,7 +67,7 @@ class RegisterView(APIView):
                 "username": user.username
             }, status=status.HTTP_201_CREATED)
         
-        # Returns specific requirement errors (e.g., password length) to the user
+        # return registration errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):

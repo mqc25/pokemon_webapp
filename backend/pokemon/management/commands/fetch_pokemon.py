@@ -9,15 +9,15 @@ class Command(BaseCommand):
     help = 'Fetches 100 Pokemon and assigns coordinates from Polyline files'
 
     def handle(self, *args, **options):
-        # 1. Load and parse the Polyline files
+        # parse the Polyline files
         def get_points_from_file(filename):
             with open(filename, 'r') as f:
                 data = json.load(f)
                 points = []
-                # Flatten the MultiLineString segments into a simple list of points
+                # flatten the list of coordinates
                 for segment in data['coordinates']:
                     for coord in segment:
-                        points.append(coord) # Each coord is [lng, lat]
+                        points.append(coord)
                 return points
 
         points_aj = get_points_from_file('A - J')
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=100")
         results = response.json()['results']
 
-        # Clear existing PokeAPI pokemon to avoid duplicates during testing
+        # Clear intial leftover pokemon
         Pokemon.objects.filter(is_custom=False).delete()
 
         for entry in results:
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             name = detail_res['name'].capitalize()
             first_letter = name[0].upper()
 
-            # 2. Determine which polyline group to use
+            # Choose coordinates based on first letter of Pokemon name
             if 'A' <= first_letter <= 'J':
                 chosen_coord = random.choice(points_aj)
             else:
@@ -43,7 +43,6 @@ class Command(BaseCommand):
 
             lng, lat = chosen_coord
 
-            # 3. Create the Pokemon
             Pokemon.objects.create(
                 name=name,
                 sprite_url=detail_res['sprites']['front_default'],

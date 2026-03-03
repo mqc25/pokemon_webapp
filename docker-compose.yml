@@ -1,5 +1,5 @@
 services:
-  # 1. The Database (PostgreSQL + PostGIS for spatial queries)
+  # Postgres DB
   db:
     image: postgis/postgis:14-3.3
     env_file:
@@ -9,7 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. The Backend (Django)
+  # Django backend
   backend:
     build: ./backend
     # Force the use of the ASGI server on port 8000
@@ -25,10 +25,9 @@ services:
     depends_on:
       - db
 
-  # 3. The Frontend (React)
+  # React frontend
   frontend:
     build: ./frontend
-    # This command starts the React dev server
     command: npm start
     volumes:
       - ./frontend:/app
@@ -36,9 +35,9 @@ services:
     ports:
       - "5173:5173"
     environment:
-      - WDS_SOCKET_PORT=0 # Prevents common React hot-reload bugs in Docker
+      - WDS_SOCKET_PORT=0
 
-  # 4. The Gateway (Nginx)
+  # Nginx proxy
   nginx:
     image: nginx:alpine
     ports:
@@ -52,4 +51,4 @@ services:
       - backend
 
 volumes:
-  postgres_data: # Persists your database data even if containers are destroyed
+  postgres_data:

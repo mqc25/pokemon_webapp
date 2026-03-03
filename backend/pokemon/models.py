@@ -6,17 +6,15 @@ class Pokemon(models.Model):
     name = models.CharField(max_length=100)
     sprite_url = models.URLField(max_length=500, blank=True, null=True)
     types = models.CharField(max_length=100)
-    
-    # 🌟 NEW: Standard float fields to easily pass to the React Map
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     
-    # Kept for PostGIS distance calculations
+    # PostGIS distance calculations
     coordinates = models.PointField(geography=True, blank=True, null=True) 
 
     encounter_location = models.CharField(max_length=255, blank=True, null=True)
     
-    # 🌟 CHANGED: Changed to TextField so the CSV string saves without JSON errors
+    # TextField coversion to avoid JSON errors
     recent_moves = models.TextField(blank=True, null=True) 
 
     is_custom = models.BooleanField(default=False)

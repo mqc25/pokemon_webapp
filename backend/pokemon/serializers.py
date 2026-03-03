@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 
 class PokemonSerializer(serializers.ModelSerializer):
-    # Requirement: Show if the current user has favorited this pokemon
+    # favorite tag
     is_favorite = serializers.SerializerMethodField()
 
     class Meta:
@@ -17,17 +17,13 @@ class PokemonSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_favorite(self, obj):
-        """
-        Checks the Favorite model for a match between the current user and this pokemon.
-        Ensures the 'Red Heart' stays red after a page refresh.
-        """
+        # check for favorite tag
         user = self.context.get('request').user
         if user and user.is_authenticated:
             return Favorite.objects.filter(user=user, pokemon=obj).exists()
         return False
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # This enforces Django's production password validators set in settings.py
     password = serializers.CharField(
         write_only=True, 
         required=True, 
