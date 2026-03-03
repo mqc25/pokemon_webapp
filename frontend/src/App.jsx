@@ -36,8 +36,9 @@ function App() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('wild'); // New State: 'wild', 'community', or 'my'
 
-  // Initial 100 pokemon fetch
+  // Initial fetch
   useEffect(() => { 
     if (isLoggedIn) fetchPokemon(); 
   }, [isLoggedIn]);
@@ -73,7 +74,6 @@ function App() {
       });
   };
 
-  // Pokemon favorite
   const toggleFavorite = (id) => {
     setPokemonList(prev => prev.map(p => 
       p.id === id ? { ...p, is_favorite: !p.is_favorite } : p
@@ -97,15 +97,35 @@ function App() {
     alert(`${name} is ${dist} km from UCLA Campus.`);
   };
 
-  // Computed Data
+  // --- Computed Data Logic ---
   const filteredPokemon = useMemo(() => {
     return pokemonList.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [pokemonList, searchQuery]);
 
+  // Group Pokemon into categories
+  const categorizedPokemon = useMemo(() => {
+    const wild = filteredPokemon.filter(p => p.owner_name === 'Wild');
+    const my = filteredPokemon.filter(p => p.owner_name === username);
+    const community = filteredPokemon.filter(p => p.owner_name !== 'Wild' && p.owner_name !== username);
+    return { wild, my, community };
+  }, [filteredPokemon, username]);
+
+  // Determine active list & pagination stats
+  const activeList = categorizedPokemon[activeCategory] || [];
+  const totalPages = Math.ceil(activeList.length / itemsPerPage) || 1;
+
   const paginatedList = useMemo(() => {
     const start = (page - 1) * itemsPerPage;
-    return filteredPokemon.slice(start, start + itemsPerPage);
-  }, [filteredPokemon, page]);
+    return activeList.slice(start, start + itemsPerPage);
+  }, [activeList, page]);
+
+  // Reset page when category tab changes
+  const handleCategoryChange = (category) => {
+    if (activeCategory !== category) {
+      setActiveCategory(category);
+      setPage(1);
+    }
+  };
 
   // Render Logic
   if (!isLoggedIn) {
@@ -120,7 +140,6 @@ function App() {
     );
   }
 
-  // Function to handle sidebar clicks
   const handleSelectPokemon = (pokemon) => {
     setSelectedPokemon(pokemon);
   };
@@ -137,13 +156,22 @@ function App() {
         paginatedList={paginatedList}
         toggleFavorite={toggleFavorite}
         page={page}
-        totalPages={Math.ceil(filteredPokemon.length / itemsPerPage)}
+        totalPages={totalPages}
         getStableMarkerColor={getStableMarkerColor}
         onSelectPokemon={handleSelectPokemon}
+        
+        // New Accordion Props
+        activeCategory={activeCategory}
+        handleCategoryChange={handleCategoryChange}
+        counts={{
+          wild: categorizedPokemon.wild.length,
+          community: categorizedPokemon.community.length,
+          my: categorizedPokemon.my.length
+        }}
       />
       
       <MapView 
-        filteredPokemon={filteredPokemon}
+        filteredPokemon={filteredPokemon} // Keeping global map view as requested
         UCLA_COORDS={UCLA_COORDS}
         calculateDistance={calculateDistance}
         selectedPokemon={selectedPokemon}
