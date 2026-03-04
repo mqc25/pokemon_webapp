@@ -11,8 +11,8 @@ const TYPE_COLORS = {
 
 export const TypeBadge = ({ types }) => {
   // Handle comma-separated string
-  const typeList = types ? types.split(',').map(t => t.trim()) : [];
-
+  const typeList = types ? types.split(/[,/]/).map(t => t.trim()).filter(Boolean) : [];
+  
   return (
     <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
       {typeList.map((type) => (
