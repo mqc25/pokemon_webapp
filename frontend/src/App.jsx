@@ -107,8 +107,12 @@ function App() {
     const formData = new FormData();
     formData.append('file', file);
     axios.post('/api/pokemon/upload_csv/', formData)
-      .then(() => { fetchPokemon(); })
-      .catch(() => alert("Upload failed. Check CSV format."));
+      .then(() => { 
+        fetchPokemon(); 
+      })
+      .catch((err) => {
+        alert(err.response?.data?.error || "Upload failed. Check file format.");
+      });
   };
 
   const calculateDistance = (lat, lng, name) => {

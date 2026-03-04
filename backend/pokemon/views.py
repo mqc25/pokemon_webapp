@@ -1,5 +1,6 @@
 import csv
 import io
+import openpyxl 
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,61 +16,72 @@ class PokemonViewSet(viewsets.ModelViewSet):
     queryset = Pokemon.objects.all().order_by('name')
     serializer_class = PokemonSerializer
     parser_classes = [MultiPartParser, FormParser]
-    #  authentication check
     permission_classes = [permissions.IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
         pokemon = self.get_object()
-        
-        # Check if the user trying to delete is the actual owner
         if pokemon.owner != request.user:
             return Response(
                 {"error": "You do not have permission to delete this Pokémon."}, 
                 status=status.HTTP_403_FORBIDDEN
             )
-            
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'], url_path='toggle_favorite')
     def toggle_favorite(self, request, pk=None):
         pokemon = self.get_object()
-        
-        fav, created = Favorite.objects.get_or_create(
-            user=request.user, 
-            pokemon=pokemon
-        )
-        
+        fav, created = Favorite.objects.get_or_create(user=request.user, pokemon=pokemon)
         if not created:
             fav.delete()
             return Response({'is_favorite': False}, status=status.HTTP_200_OK)
-            
         return Response({'is_favorite': True}, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['post'], url_path='upload_csv')
     def upload_csv(self, request):
         file = request.FILES.get('file')
         if not file:
-            return Response({"error": "No file"}, status=400)
+            return Response({"error": "No file uploaded."}, status=400)
+            
         try:
-            data_set = file.read().decode('UTF-8')
-            io_string = io.StringIO(data_set)
-            reader = csv.reader(io_string)
-            next(reader) 
-            for row in reader:
-                Pokemon.objects.create(
-                    name=row[0],
-                    latitude=float(row[1]), 
-                    longitude=float(row[2]),
-                    coordinates=Point(float(row[2]), float(row[1])),
-                    types=row[3], 
-                    encounter_location=row[4],
-                    recent_moves=row[5], 
-                    sprite_url=row[6], is_custom=True,
-                    owner=request.user
-                )
-            return Response({"status": "Uploaded"}, status=201)
+            # Handle CSV Files
+            if file.name.endswith('.csv'):
+                data_set = file.read().decode('UTF-8')
+                io_string = io.StringIO(data_set)
+                reader = csv.reader(io_string)
+                next(reader)
+                for row in reader:
+                    self._create_pokemon_from_row(row, request.user)
+                    
+            # Handle XLSX Files
+            elif file.name.endswith('.xlsx'):
+                wb = openpyxl.load_workbook(file, data_only=True)
+                sheet = wb.active
+                rows = list(sheet.iter_rows(values_only=True))
+                for row in rows[1:]:
+                    if row[0]: 
+                        self._create_pokemon_from_row(row, request.user)
+            
+            else:
+                return Response({"error": "Unsupported file format. Please upload a .csv or .xlsx file."}, status=400)
+
+            return Response({"status": "Uploaded successfully"}, status=201)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
+
+    def _create_pokemon_from_row(self, row, user):
+        """Helper to create a Pokemon regardless of whether it came from CSV or XLSX"""
+        Pokemon.objects.create(
+            name=str(row[0]),
+            latitude=float(row[1]), 
+            longitude=float(row[2]),
+            coordinates=Point(float(row[2]), float(row[1])),
+            types=str(row[3]), 
+            encounter_location=str(row[4]),
+            recent_moves=str(row[5]), 
+            sprite_url=str(row[6]), 
+            is_custom=True,
+            owner=user
+        )
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -96,7 +108,7 @@ class LoginView(APIView):
         if user:
             login(request, user)
             return Response({"status": "success"})
-        return Response({"error": "Invalid"}, status=401)
+        return Response({"error": "Invalid credentials"}, status=401)
 
 class LogoutView(APIView):
     def post(self, request):
