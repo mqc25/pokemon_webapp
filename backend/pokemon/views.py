@@ -18,6 +18,18 @@ class PokemonViewSet(viewsets.ModelViewSet):
     #  authentication check
     permission_classes = [permissions.IsAuthenticated]
 
+    def destroy(self, request, *args, **kwargs):
+        pokemon = self.get_object()
+        
+        # Check if the user trying to delete is the actual owner
+        if pokemon.owner != request.user:
+            return Response(
+                {"error": "You do not have permission to delete this Pokémon."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=True, methods=['post'], url_path='toggle_favorite')
     def toggle_favorite(self, request, pk=None):
         pokemon = self.get_object()

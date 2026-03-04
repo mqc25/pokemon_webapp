@@ -82,6 +82,25 @@ function App() {
       .catch(() => fetchPokemon());
   };
 
+  const handleDeletePokemon = (id) => {
+    // confirmation dialog before deletion
+    if (!window.confirm("Are you sure you want to release this Pokémon?")) return;
+    
+    axios.delete(`/api/pokemon/${id}/`)
+      .then(() => {
+        // remove it from the local state immediately
+        setPokemonList(prev => prev.filter(p => p.id !== id));
+        
+        // if the user had this Pokemon selected on the map, clear it
+        if (selectedPokemon?.id === id) {
+          setSelectedPokemon(null);
+        }
+      })
+      .catch(err => {
+        alert(err.response?.data?.error || "Failed to delete Pokémon.");
+      });
+  };
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -97,7 +116,7 @@ function App() {
     alert(`${name} is ${dist} km from UCLA Campus.`);
   };
 
-  // --- Computed Data Logic ---
+  // Computed Data Logic
   const filteredPokemon = useMemo(() => {
     return pokemonList.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [pokemonList, searchQuery]);
@@ -155,12 +174,13 @@ function App() {
         setPage={setPage}
         paginatedList={paginatedList}
         toggleFavorite={toggleFavorite}
+        handleDeletePokemon={handleDeletePokemon}
         page={page}
         totalPages={totalPages}
         getStableMarkerColor={getStableMarkerColor}
         onSelectPokemon={handleSelectPokemon}
         
-        // New Accordion Props
+        // Accordion for 3 list
         activeCategory={activeCategory}
         handleCategoryChange={handleCategoryChange}
         counts={{
@@ -171,7 +191,7 @@ function App() {
       />
       
       <MapView 
-        filteredPokemon={filteredPokemon} // Keeping global map view as requested
+        filteredPokemon={filteredPokemon}
         UCLA_COORDS={UCLA_COORDS}
         calculateDistance={calculateDistance}
         selectedPokemon={selectedPokemon}

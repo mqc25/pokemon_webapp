@@ -10,12 +10,14 @@ import SearchIcon from '@mui/icons-material/Search';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { TypeBadge } from '../Common/TypeBadge';
 
 export const PokemonSidebar = ({ 
   username, handleLogout, handleFileUpload, 
   searchQuery, setSearchQuery, setPage, 
-  paginatedList, toggleFavorite, page, totalPages,
+  paginatedList, toggleFavorite,
+  handleDeletePokemon, page, totalPages,
   getStableMarkerColor, onSelectPokemon,
   activeCategory, handleCategoryChange, counts
 }) => {
@@ -28,9 +30,24 @@ export const PokemonSidebar = ({
           key={p.id} 
           disablePadding
           secondaryAction={
-            <IconButton onClick={() => toggleFavorite(p.id)}>
-              {p.is_favorite ? <FavoriteIcon sx={{ color: '#ff1744' }} /> : <FavoriteBorderIcon />}
-            </IconButton>
+            <Box sx={{ display: 'flex' }}>
+              {/* Conditionally render Delete Icon ONLY if the user own it */}
+              {p.owner_name === username && (
+                <IconButton onClick={(e) => { 
+                  e.stopPropagation();
+                  handleDeletePokemon(p.id)
+                  }}>
+                  <DeleteIcon sx={{ color: 'text.secondary' }} />
+                </IconButton>
+              )}
+              
+              <IconButton onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(p.id)
+                }}>
+                {p.is_favorite ? <FavoriteIcon sx={{ color: '#ff1744' }} /> : <FavoriteBorderIcon />}
+              </IconButton>
+            </Box>
           }
         >
           <ListItemButton onClick={() => onSelectPokemon(p)}>
