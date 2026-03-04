@@ -14,12 +14,10 @@ export const PokemonPopup = ({ pokemon, calculateDistance }) => {
       <img src={pokemon.sprite_url} alt={pokemon.name} width="80" />
       <Typography variant="h6" sx={{ textTransform: 'capitalize' }}>{pokemon.name}</Typography>
 
-      {/*Display type badge*/}
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
           <TypeBadge types={pokemon.types} />
       </Box>    
 
-      {/*Display location*/}
       <Typography variant="body2">
         <strong>Coords:</strong> {pokemon.latitude.toFixed(4)}, {pokemon.longitude.toFixed(4)}
       </Typography>
@@ -28,7 +26,6 @@ export const PokemonPopup = ({ pokemon, calculateDistance }) => {
         <strong>Seen:</strong> {displayLocation}
       </Typography>
 
-      {/* Display ownership*/}
       <Typography 
         variant="subtitle2" 
         sx={{ 
@@ -40,13 +37,11 @@ export const PokemonPopup = ({ pokemon, calculateDistance }) => {
         Owner: {pokemon.owner_name}
       </Typography>
       
-      {/* Display energy*/}
+      {/* The energy component handles its own WebSocket connection now */}
       <PokemonEnergy pokemonId={pokemon.id} />
 
-      {/* Display recent moves*/}
       <MoveList moves={pokemon.recent_moves} /> 
 
-      {/*"How far am I from home?" button*/}
       <Button 
         variant="contained" size="small" fullWidth startIcon={<SchoolIcon />} 
         onClick={() => calculateDistance(pokemon.latitude, pokemon.longitude, pokemon.name)} 

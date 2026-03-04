@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Typography, Box, LinearProgress, Chip } from '@mui/material';
 import BoltIcon from '@mui/icons-material/Bolt';
 
+
 const PokemonEnergy = ({ pokemonId }) => {
   const [energy, setEnergy] = useState(100);
   const [weather, setWeather] = useState('Loading...');
